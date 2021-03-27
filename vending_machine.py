@@ -61,6 +61,7 @@ class VendingMachine:
         
     def refill(self): # will restore original quantities of all items
 
+
         if not self.transition(self.STATE_IDLE):
             return
 
@@ -158,8 +159,10 @@ class VendingMachine:
                 quantity = self.items[selected_item]['quantity']
 
                 if self.balance < price:
+                    print("----------------------------------------")
                     print("You have not inserted enough coins to purchase this item. \
                         This item costs ${}. You have inserted ${}.".format(price, self.balance))
+                    print("----------------------------------------")
                     return
                 if quantity == 0:
                     print("Please select an item that is in stock.")
@@ -186,7 +189,8 @@ class VendingMachine:
     def process_refund(self, selected_item): # refunds user, resets balance
         refund_amt = self.calc_refund(selected_item)
         
-        self.transition(self.STATE_REFUNDING)
+        if not self.transition(self.STATE_REFUNDING):
+            return
 
         if refund_amt == 0: 
             print("Your transaction is complete.")
@@ -200,7 +204,9 @@ class VendingMachine:
 
 
     def dispense(self, selected_item): # gives item to user, updates count of items in machine
-        self.transition(self.STATE_DISPENSING)
+        if not self.transition(self.STATE_DISPENSING):
+            return
+
         time.sleep(1)
         print("Purchasing {}...".format(selected_item))
         self.items[selected_item]['quantity'] -= 1      
@@ -218,10 +224,15 @@ class VendingMachine:
         
     def cancel(self): # cancels transaction, refunds any money in machine
         if self.balance != 0: 
-            self.transition(self.STATE_REFUNDING)
+            if not self.transition(self.STATE_REFUNDING):
+                return
+
             time.sleep(1)
             print("Refunded {} dollars.".format(self.balance))
             self.balance = 0
+        else:
+            print("No money to refund.")
         time.sleep(1)
+
         self.transition(self.STATE_IDLE)
 
